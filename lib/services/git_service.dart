@@ -5,32 +5,18 @@ import '../models/repository.dart';
 class GitService {
   Future<List<GitRepository>> findRepositories(String basePath) async {
     final repos = <GitRepository>[];
-    await _scanDirectory(Directory(basePath), repos, depth: 0);
-    return repos;
-  }
-
-  Future<void> _scanDirectory(
-    Directory dir,
-    List<GitRepository> repos, {
-    required int depth,
-  }) async {
-    if (depth > 4) return;
     try {
-      final gitDir = Directory(p.join(dir.path, '.git'));
-      if (await gitDir.exists()) {
-        repos.add(GitRepository(path: dir.path, name: p.basename(dir.path)));
-        return; // don't recurse into git repos
-      }
-      final entries = await dir.list(followLinks: false).toList();
+      final entries = await Directory(basePath).list(followLinks: false).toList();
       for (final entry in entries) {
         if (entry is Directory) {
-          final name = p.basename(entry.path);
-          if (!name.startsWith('.') && name != 'node_modules') {
-            await _scanDirectory(entry, repos, depth: depth + 1);
+          final gitDir = Directory(p.join(entry.path, '.git'));
+          if (await gitDir.exists()) {
+            repos.add(GitRepository(path: entry.path, name: p.basename(entry.path)));
           }
         }
       }
     } catch (_) {}
+    return repos;
   }
 
   Future<String?> getCurrentBranch(String repoPath) async {
@@ -98,7 +84,6 @@ class GitService {
     final result = await _run(repoPath, ['status', '--porcelain']);
     if (result == null || result.trim().isEmpty) return [];
     return result
-        .trim()
         .split('\n')
         .where((l) => l.isNotEmpty)
         .map((line) {
