@@ -6,12 +6,16 @@ class GitService {
   Future<List<GitRepository>> findRepositories(String basePath) async {
     final repos = <GitRepository>[];
     try {
-      final entries = await Directory(basePath).list(followLinks: false).toList();
+      final entries = await Directory(
+        basePath,
+      ).list(followLinks: false).toList();
       for (final entry in entries) {
         if (entry is Directory) {
           final gitDir = Directory(p.join(entry.path, '.git'));
           if (await gitDir.exists()) {
-            repos.add(GitRepository(path: entry.path, name: p.basename(entry.path)));
+            repos.add(
+              GitRepository(path: entry.path, name: p.basename(entry.path)),
+            );
           }
         }
       }
@@ -83,35 +87,34 @@ class GitService {
   Future<List<GitStatusFile>> getStatus(String repoPath) async {
     final result = await _run(repoPath, ['status', '--porcelain']);
     if (result == null || result.trim().isEmpty) return [];
-    return result
-        .split('\n')
-        .where((l) => l.isNotEmpty)
-        .map((line) {
-          final xy = line.substring(0, 2).trim();
-          final path = line.substring(3).trim();
-          final status = xy.isEmpty ? '?' : xy[0];
-          return GitStatusFile(path: path, status: status);
-        })
-        .toList();
+    return result.split('\n').where((l) => l.isNotEmpty).map((line) {
+      final xy = line.substring(0, 2).trim();
+      var path = line.substring(3).trim();
+      final status = xy.isEmpty ? '?' : xy[0];
+      // Renamed/copied entries look like "old/path -> new/path"; keep only the new path.
+      if (path.contains(' -> ')) path = path.split(' -> ').last;
+      return GitStatusFile(path: path, status: status);
+    }).toList();
   }
 
   Future<List<GitBranch>> getBranches(String repoPath) async {
-    final result = await _run(repoPath, ['branch', '-a', '--format=%(refname:short) %(HEAD)']);
+    final result = await _run(repoPath, [
+      'branch',
+      '-a',
+      '--format=%(refname:short) %(HEAD)',
+    ]);
     if (result == null || result.trim().isEmpty) return [];
-    return result
-        .trim()
-        .split('\n')
-        .where((l) => l.isNotEmpty)
-        .map((line) {
-          final isCurrent = line.endsWith(' *');
-          final name = isCurrent ? line.substring(0, line.length - 2).trim() : line.trim();
-          return GitBranch(
-            name: name,
-            isCurrent: isCurrent,
-            isRemote: name.startsWith('remotes/'),
-          );
-        })
-        .toList();
+    return result.trim().split('\n').where((l) => l.isNotEmpty).map((line) {
+      final isCurrent = line.endsWith(' *');
+      final name = isCurrent
+          ? line.substring(0, line.length - 2).trim()
+          : line.trim();
+      return GitBranch(
+        name: name,
+        isCurrent: isCurrent,
+        isRemote: name.startsWith('remotes/'),
+      );
+    }).toList();
   }
 
   Future<String?> getDiff(String repoPath, {String? filePath}) async {
