@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../../models/repository.dart';
 import '../../providers/app_provider.dart';
 
 class OverviewTab extends StatelessWidget {
@@ -21,47 +22,54 @@ class OverviewTab extends StatelessWidget {
         children: [
           _SectionTitle(title: 'Repository Info'),
           const SizedBox(height: 8),
-          _InfoCard(children: [
-            _InfoRow(
-              icon: Icons.folder_outlined,
-              label: 'Path',
-              value: repo.path,
-            ),
-            _InfoRow(
-              icon: Icons.call_split,
-              label: 'Branch',
-              value: repo.currentBranch ?? 'unknown',
-              valueColor: theme.colorScheme.primary,
-            ),
-            _InfoRow(
-              icon: Icons.cloud_outlined,
-              label: 'Remote',
-              value: repo.remoteUrl ?? 'No remote',
-            ),
-            _InfoRow(
-              icon: Icons.circle,
-              label: 'Status',
-              value: repo.statusSummary,
-              valueColor: repo.hasUncommittedChanges
-                  ? theme.colorScheme.error
-                  : Colors.green,
-            ),
-            if (repo.aheadCount > 0 || repo.behindCount > 0)
+          _InfoCard(
+            children: [
               _InfoRow(
-                icon: Icons.sync_alt,
-                label: 'Sync',
-                value: [
-                  if (repo.aheadCount > 0) '${repo.aheadCount} ahead',
-                  if (repo.behindCount > 0) '${repo.behindCount} behind',
-                ].join(', '),
+                icon: Icons.folder_outlined,
+                label: 'Path',
+                value: repo.path,
               ),
-          ]),
+              _InfoRow(
+                icon: Icons.call_split,
+                label: 'Branch',
+                value: repo.currentBranch ?? 'unknown',
+                valueColor: theme.colorScheme.primary,
+              ),
+              _InfoRow(
+                icon: Icons.cloud_outlined,
+                label: 'Remote',
+                value: repo.remoteUrl ?? 'No remote',
+              ),
+              _InfoRow(
+                icon: Icons.circle,
+                label: 'Status',
+                value: repo.statusSummary,
+                valueColor: repo.hasUncommittedChanges
+                    ? theme.colorScheme.error
+                    : Colors.green,
+              ),
+              if (repo.aheadCount > 0 || repo.behindCount > 0)
+                _InfoRow(
+                  icon: Icons.sync_alt,
+                  label: 'Sync',
+                  value: [
+                    if (repo.aheadCount > 0) '${repo.aheadCount} ahead',
+                    if (repo.behindCount > 0) '${repo.behindCount} behind',
+                  ].join(', '),
+                ),
+            ],
+          ),
           if (provider.statusFiles.isNotEmpty) ...[
             const SizedBox(height: 20),
-            _SectionTitle(title: 'Changed Files (${provider.statusFiles.length})'),
+            _SectionTitle(
+              title: 'Changed Files (${provider.statusFiles.length})',
+            ),
             const SizedBox(height: 8),
             _InfoCard(
-              children: provider.statusFiles.take(10).map((f) => _FileStatusRow(file: f)).toList(),
+              children: provider.statusFiles
+                  .take(10)
+                  .map((f) => _FileStatusRow(file: f))
+                  .toList(),
             ),
             if (provider.statusFiles.length > 10)
               Padding(
@@ -79,7 +87,10 @@ class OverviewTab extends StatelessWidget {
             _SectionTitle(title: 'Recent Commits'),
             const SizedBox(height: 8),
             _InfoCard(
-              children: provider.commits.take(5).map((c) => _CommitRow(commit: c)).toList(),
+              children: provider.commits
+                  .take(5)
+                  .map((c) => _CommitRow(commit: c))
+                  .toList(),
             ),
           ],
         ],
@@ -156,7 +167,11 @@ class _InfoRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         children: [
-          Icon(icon, size: 14, color: theme.colorScheme.onSurface.withAlpha(102)),
+          Icon(
+            icon,
+            size: 14,
+            color: theme.colorScheme.onSurface.withAlpha(102),
+          ),
           const SizedBox(width: 8),
           SizedBox(
             width: 72,
@@ -184,7 +199,7 @@ class _InfoRow extends StatelessWidget {
 }
 
 class _FileStatusRow extends StatelessWidget {
-  final dynamic file;
+  final GitStatusFile file;
   const _FileStatusRow({required this.file});
 
   Color _statusColor(BuildContext context) {
@@ -221,7 +236,9 @@ class _FileStatusRow extends StatelessWidget {
           Expanded(
             child: Text(
               file.path,
-              style: theme.textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontFamily: 'monospace',
+              ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -232,7 +249,7 @@ class _FileStatusRow extends StatelessWidget {
 }
 
 class _CommitRow extends StatelessWidget {
-  final dynamic commit;
+  final GitCommit commit;
   const _CommitRow({required this.commit});
 
   @override
