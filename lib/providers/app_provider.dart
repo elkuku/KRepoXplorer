@@ -156,9 +156,9 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> refreshSelectedRepo() async {
     if (_selectedRepo == null) return;
-    await _git.loadRepositoryDetails(_selectedRepo!);
     detailLoadState = LoadState.loading;
     notifyListeners();
+    await _git.loadRepositoryDetails(_selectedRepo!);
     await _loadRepoDetails(_selectedRepo!);
   }
 
