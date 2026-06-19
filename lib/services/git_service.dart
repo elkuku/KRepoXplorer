@@ -154,10 +154,16 @@ class GitService {
   }
 
   Future<void> loadRepositoryDetails(GitRepository repo) async {
-    repo.currentBranch = await getCurrentBranch(repo.path);
-    repo.hasUncommittedChanges = await hasUncommittedChanges(repo.path);
-    repo.remoteUrl = await getRemoteUrl(repo.path);
-    final counts = await getAheadBehind(repo.path);
+    final results = await Future.wait([
+      getCurrentBranch(repo.path),
+      hasUncommittedChanges(repo.path),
+      getRemoteUrl(repo.path),
+      getAheadBehind(repo.path),
+    ]);
+    repo.currentBranch = results[0] as String?;
+    repo.hasUncommittedChanges = results[1] as bool;
+    repo.remoteUrl = results[2] as String?;
+    final counts = results[3] as ({int ahead, int behind});
     repo.aheadCount = counts.ahead;
     repo.behindCount = counts.behind;
   }
