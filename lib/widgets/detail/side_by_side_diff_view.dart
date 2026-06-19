@@ -1,156 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:highlight/highlight.dart' show highlight, Node;
-import 'package:highlight/languages/bash.dart';
-import 'package:highlight/languages/cpp.dart';
-import 'package:highlight/languages/css.dart';
-import 'package:highlight/languages/dart.dart';
-import 'package:highlight/languages/go.dart';
-import 'package:highlight/languages/java.dart';
-import 'package:highlight/languages/javascript.dart';
-import 'package:highlight/languages/json.dart';
-import 'package:highlight/languages/kotlin.dart';
-import 'package:highlight/languages/markdown.dart';
-import 'package:highlight/languages/php.dart';
-import 'package:highlight/languages/python.dart';
-import 'package:highlight/languages/ruby.dart';
-import 'package:highlight/languages/rust.dart';
-import 'package:highlight/languages/sql.dart';
-import 'package:highlight/languages/swift.dart';
-import 'package:highlight/languages/typescript.dart';
-import 'package:highlight/languages/xml.dart';
-import 'package:highlight/languages/yaml.dart';
-import 'package:flutter_highlight/themes/atom-one-dark.dart';
-import 'package:flutter_highlight/themes/github.dart';
-
-// ---------------------------------------------------------------------------
-// Language registration (lazy, once per language)
-// ---------------------------------------------------------------------------
-
-final _registered = <String>{};
-
-void _ensureLanguage(String lang) {
-  if (_registered.contains(lang)) return;
-  _registered.add(lang);
-  switch (lang) {
-    case 'dart':
-      highlight.registerLanguage('dart', dart);
-    case 'javascript':
-      highlight.registerLanguage('javascript', javascript);
-    case 'typescript':
-      highlight.registerLanguage('typescript', typescript);
-    case 'python':
-      highlight.registerLanguage('python', python);
-    case 'java':
-      highlight.registerLanguage('java', java);
-    case 'kotlin':
-      highlight.registerLanguage('kotlin', kotlin);
-    case 'swift':
-      highlight.registerLanguage('swift', swift);
-    case 'go':
-      highlight.registerLanguage('go', go);
-    case 'rust':
-      highlight.registerLanguage('rust', rust);
-    case 'cpp':
-      highlight.registerLanguage('cpp', cpp);
-    case 'css':
-      highlight.registerLanguage('css', css);
-    case 'xml':
-      highlight.registerLanguage('xml', xml);
-    case 'json':
-      highlight.registerLanguage('json', json);
-    case 'yaml':
-      highlight.registerLanguage('yaml', yaml);
-    case 'bash':
-      highlight.registerLanguage('bash', bash);
-    case 'sql':
-      highlight.registerLanguage('sql', sql);
-    case 'markdown':
-      highlight.registerLanguage('markdown', markdown);
-    case 'php':
-      highlight.registerLanguage('php', php);
-    case 'ruby':
-      highlight.registerLanguage('ruby', ruby);
-  }
-}
-
-String? _detectLanguage(String? ext) => switch (ext?.toLowerCase()) {
-  'dart' => 'dart',
-  'js' || 'jsx' || 'mjs' => 'javascript',
-  'ts' || 'tsx' => 'typescript',
-  'py' => 'python',
-  'java' => 'java',
-  'kt' => 'kotlin',
-  'swift' => 'swift',
-  'go' => 'go',
-  'rs' => 'rust',
-  'cpp' || 'cc' || 'cxx' || 'h' || 'hpp' => 'cpp',
-  'css' || 'scss' || 'less' => 'css',
-  'html' || 'htm' || 'xml' || 'svg' => 'xml',
-  'json' => 'json',
-  'yaml' || 'yml' => 'yaml',
-  'sh' || 'bash' || 'zsh' => 'bash',
-  'sql' => 'sql',
-  'md' || 'markdown' => 'markdown',
-  'php' => 'php',
-  'rb' => 'ruby',
-  _ => null,
-};
-
-String? _extractLanguage(String diff) {
-  final match = RegExp(r'^---\s+[ab]/(.+)$', multiLine: true).firstMatch(diff);
-  if (match == null) return null;
-  final ext = match.group(1)!.split('.').last;
-  return _detectLanguage(ext);
-}
-
-// ---------------------------------------------------------------------------
-// Highlight → TextSpan conversion (mirrors flutter_highlight's _convert)
-// ---------------------------------------------------------------------------
-
-List<TextSpan> _convert(List<Node> nodes, Map<String, TextStyle> theme) {
-  final spans = <TextSpan>[];
-  var current = spans;
-  final stack = <List<TextSpan>>[];
-
-  void traverse(Node node) {
-    if (node.value != null) {
-      final style = node.className != null ? theme[node.className!] : null;
-      current.add(TextSpan(text: node.value, style: style));
-    } else if (node.children != null) {
-      final tmp = <TextSpan>[];
-      current.add(TextSpan(children: tmp, style: theme[node.className!]));
-      stack.add(current);
-      current = tmp;
-      for (final child in node.children!) {
-        traverse(child);
-      }
-      current = stack.removeLast();
-    }
-  }
-
-  for (final node in nodes) {
-    traverse(node);
-  }
-  return spans;
-}
-
-List<TextSpan> _highlight(
-  String code,
-  String? language,
-  Map<String, TextStyle> theme,
-) {
-  if (language == null || code.trim().isEmpty) {
-    return [TextSpan(text: code)];
-  }
-  _ensureLanguage(language);
-  try {
-    final result = highlight.parse(code, language: language);
-    final spans = _convert(result.nodes ?? [], theme);
-    return spans.isEmpty ? [TextSpan(text: code)] : spans;
-  } catch (_) {
-    return [TextSpan(text: code)];
-  }
-}
+import 'diff_utils.dart';
 
 // ---------------------------------------------------------------------------
 // Diff parser
@@ -185,7 +34,6 @@ List<_Row> _parseDiff(String content) {
   int leftNum = 0;
   int rightNum = 0;
 
-  // Buffers for pairing removed/added lines in a changed block
   final removed = <(String, int)>[];
   final added = <(String, int)>[];
 
@@ -265,8 +113,8 @@ class SideBySideDiffView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final hlTheme = isDark ? atomOneDarkTheme : githubTheme;
-    final language = _extractLanguage(content);
+    final hlTheme = diffHlTheme(Theme.of(context).brightness);
+    final language = extractLang(content);
     final rows = _parseDiff(content);
 
     return SelectionArea(
@@ -400,7 +248,7 @@ class _Cell extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final spans = code != null
-        ? _highlight(code!, language, hlTheme)
+        ? highlightCode(code!, language, hlTheme)
         : <TextSpan>[];
     final baseColor =
         hlTheme['root']?.color ??
