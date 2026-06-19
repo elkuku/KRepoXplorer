@@ -294,8 +294,7 @@ class _Cell extends StatelessWidget {
           else
             const SizedBox(width: 12),
           Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
+            child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
               child: code != null
                   ? RichText(
