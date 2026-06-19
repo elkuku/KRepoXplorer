@@ -98,9 +98,7 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
     try {
       final repos = await _git.findRepositories(entry.path);
-      for (final repo in repos) {
-        await _git.loadRepositoryDetails(repo);
-      }
+      await Future.wait(repos.map(_git.loadRepositoryDetails));
       repos.sort(
         (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
       );
