@@ -21,9 +21,21 @@ After every code change, rebuild and relaunch with `flutter run -d linux` to ver
 - **UI**: Single screen (`MainScreen`) with a resizable two-pane layout — sidebar (folder/repo tree) + detail panel (tabs: Overview, Branches, Commits, Changes). No Navigator/routing.
 - **Storage**: `lib/services/storage_service.dart` persists only base folder paths via `SharedPreferences`.
 
+## CI/CD
+
+`.github/workflows/ci.yml` runs on every push and PR:
+- `flutter analyze` + `flutter test` on every push to `main` and all PRs.
+- On `v*.*.*` tags: builds the Linux release bundle, packages it as `krepo_xplorer-linux-x64-<tag>.tar.gz`, and publishes a GitHub release with auto-generated notes.
+
+To cut a release: `git tag v0.x.y && git push --tags`
+
 ## Diff view
 
-Current diff display is in `lib/widgets/detail/diff_view.dart` — plain text, no syntax highlighting.
+`lib/widgets/detail/diff_view.dart` supports two modes (toggled via Settings):
+- **Unified** — syntax-highlighted single-column diff.
+- **Side by side** — `lib/widgets/detail/side_by_side_diff_view.dart`, pairs removed/added lines column-by-column with per-token syntax highlighting via `flutter_highlight`.
+
+Language is detected from the `--- a/file.ext` header; 19 languages are registered on first use.
 
 ## Conventions
 
