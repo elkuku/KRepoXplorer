@@ -12,9 +12,7 @@ class FolderTree extends StatelessWidget {
     final folders = provider.baseFolders;
 
     if (folders.isEmpty) {
-      return _EmptyState(onAdd: () async {
-        // handled by sidebar button
-      });
+      return const _EmptyState();
     }
 
     return ListView.builder(
@@ -27,8 +25,7 @@ class FolderTree extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  final VoidCallback onAdd;
-  const _EmptyState({required this.onAdd});
+  const _EmptyState();
 
   @override
   Widget build(BuildContext context) {
@@ -94,11 +91,7 @@ class _BaseFolderTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 4),
-                Icon(
-                  Icons.folder,
-                  size: 16,
-                  color: theme.colorScheme.tertiary,
-                ),
+                Icon(Icons.folder, size: 16, color: theme.colorScheme.tertiary),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -140,7 +133,10 @@ class _FolderContent extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Text(
           'Error: ${entry.error}',
-          style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 11),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.error,
+            fontSize: 11,
+          ),
         ),
       );
     }
