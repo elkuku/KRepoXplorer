@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import '../providers/app_provider.dart';
 
 class StorageService {
   static const _baseFoldersKey = 'base_folders';
@@ -14,13 +15,15 @@ class StorageService {
     await prefs.setStringList(_baseFoldersKey, folders);
   }
 
-  Future<String> loadDiffMode() async {
+  Future<DiffMode> loadDiffMode() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_diffModeKey) ?? 'normal';
+    final raw = prefs.getString(_diffModeKey) ?? '';
+    return DiffMode.values.where((e) => e.name == raw).firstOrNull ??
+        DiffMode.normal;
   }
 
-  Future<void> saveDiffMode(String mode) async {
+  Future<void> saveDiffMode(DiffMode mode) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_diffModeKey, mode);
+    await prefs.setString(_diffModeKey, mode.name);
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/app_provider.dart';
+import '../providers/app_provider.dart' show AppProvider, DiffMode;
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -60,15 +60,15 @@ class _DiffModeSelector extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          SegmentedButton<String>(
+          SegmentedButton<DiffMode>(
             segments: const [
               ButtonSegment(
-                value: 'normal',
+                value: DiffMode.normal,
                 label: Text('Unified'),
                 icon: Icon(Icons.view_stream_outlined, size: 16),
               ),
               ButtonSegment(
-                value: 'sideBySide',
+                value: DiffMode.sideBySide,
                 label: Text('Side by side'),
                 icon: Icon(Icons.view_column_outlined, size: 16),
               ),

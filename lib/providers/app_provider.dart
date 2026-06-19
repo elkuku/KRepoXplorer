@@ -5,6 +5,10 @@ import '../services/storage_service.dart';
 
 enum LoadState { idle, loading, loaded, error }
 
+enum DiffMode { normal, sideBySide }
+
+enum DetailTab { overview, changes, commits, branches, diff }
+
 class BaseFolderEntry {
   final String path;
   bool isExpanded;
@@ -29,7 +33,7 @@ class AppProvider extends ChangeNotifier {
 
   final List<BaseFolderEntry> _baseFolders = [];
   GitRepository? _selectedRepo;
-  String _detailTab = 'overview';
+  DetailTab _detailTab = DetailTab.overview;
   GitStatusFile? _selectedStatusFile;
 
   // Detail panel data
@@ -43,12 +47,12 @@ class AppProvider extends ChangeNotifier {
   bool _initialized = false;
   bool get isInitialized => _initialized;
 
-  String _diffMode = 'normal';
-  String get diffMode => _diffMode;
+  DiffMode _diffMode = DiffMode.normal;
+  DiffMode get diffMode => _diffMode;
 
   List<BaseFolderEntry> get baseFolders => List.unmodifiable(_baseFolders);
   GitRepository? get selectedRepo => _selectedRepo;
-  String get detailTab => _detailTab;
+  DetailTab get detailTab => _detailTab;
   GitStatusFile? get selectedStatusFile => _selectedStatusFile;
 
   Future<void> initialize() async {
@@ -64,7 +68,7 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> setDiffMode(String mode) async {
+  Future<void> setDiffMode(DiffMode mode) async {
     _diffMode = mode;
     await _storage.saveDiffMode(mode);
     notifyListeners();
@@ -158,7 +162,7 @@ class AppProvider extends ChangeNotifier {
     await _loadRepoDetails(_selectedRepo!);
   }
 
-  void setDetailTab(String tab) {
+  void setDetailTab(DetailTab tab) {
     _detailTab = tab;
     _selectedStatusFile = null;
     diffContent = null;

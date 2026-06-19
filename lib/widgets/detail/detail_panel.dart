@@ -176,19 +176,19 @@ class _DetailHeaderState extends State<_DetailHeader> {
 }
 
 class _TabBar extends StatelessWidget {
-  final String currentTab;
+  final DetailTab currentTab;
   const _TabBar({required this.currentTab});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final provider = context.read<AppProvider>();
-    final tabs = [
-      ('overview', Icons.info_outline, 'Overview'),
-      ('changes', Icons.edit_note, 'Changes'),
-      ('commits', Icons.history, 'Commits'),
-      ('branches', Icons.call_split, 'Branches'),
-      ('diff', Icons.difference_outlined, 'Diff'),
+    const tabs = [
+      (DetailTab.overview, Icons.info_outline, 'Overview'),
+      (DetailTab.changes, Icons.edit_note, 'Changes'),
+      (DetailTab.commits, Icons.history, 'Commits'),
+      (DetailTab.branches, Icons.call_split, 'Branches'),
+      (DetailTab.diff, Icons.difference_outlined, 'Diff'),
     ];
 
     return Container(
@@ -244,7 +244,7 @@ class _TabBar extends StatelessWidget {
 }
 
 class _TabContent extends StatelessWidget {
-  final String currentTab;
+  final DetailTab currentTab;
   const _TabContent({required this.currentTab});
 
   @override
@@ -265,12 +265,11 @@ class _TabContent extends StatelessWidget {
     }
 
     return switch (currentTab) {
-      'overview' => const OverviewTab(),
-      'changes' => const ChangesTab(),
-      'commits' => const CommitsTab(),
-      'branches' => const BranchesTab(),
-      'diff' => const DiffView(),
-      _ => const SizedBox.shrink(),
+      DetailTab.overview => const OverviewTab(),
+      DetailTab.changes => const ChangesTab(),
+      DetailTab.commits => const CommitsTab(),
+      DetailTab.branches => const BranchesTab(),
+      DetailTab.diff => const DiffView(),
     };
   }
 }

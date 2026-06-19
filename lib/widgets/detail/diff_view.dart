@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/app_provider.dart';
+import '../../providers/app_provider.dart' show AppProvider, DiffMode;
 import 'diff_utils.dart';
 import 'side_by_side_diff_view.dart';
 
@@ -36,7 +36,7 @@ class _DiffViewState extends State<DiffView> {
       return const Center(child: Text('No diff to show'));
     }
 
-    if (provider.diffMode == 'sideBySide') {
+    if (provider.diffMode == DiffMode.sideBySide) {
       return SideBySideDiffView(content: content);
     }
 
