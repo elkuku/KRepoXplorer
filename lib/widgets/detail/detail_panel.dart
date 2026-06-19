@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/app_provider.dart';
+import '../../screens/settings_screen.dart';
 import 'overview_tab.dart';
 import 'commits_tab.dart';
 import 'branches_tab.dart';
@@ -114,7 +115,11 @@ class _DetailHeaderState extends State<_DetailHeader> {
       ),
       child: Row(
         children: [
-          Icon(Icons.source_outlined, size: 18, color: theme.colorScheme.primary),
+          Icon(
+            Icons.source_outlined,
+            size: 18,
+            color: theme.colorScheme.primary,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -123,7 +128,9 @@ class _DetailHeaderState extends State<_DetailHeader> {
               children: [
                 Text(
                   widget.repoName,
-                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 Text(
                   widget.repoPath,
@@ -142,7 +149,9 @@ class _DetailHeaderState extends State<_DetailHeader> {
               size: 18,
               color: _autoRefresh ? theme.colorScheme.primary : null,
             ),
-            tooltip: _autoRefresh ? 'Stop auto-refresh (5s)' : 'Start auto-refresh (5s)',
+            tooltip: _autoRefresh
+                ? 'Stop auto-refresh (5s)'
+                : 'Start auto-refresh (5s)',
             onPressed: _toggleAutoRefresh,
             visualDensity: VisualDensity.compact,
           ),
@@ -150,6 +159,14 @@ class _DetailHeaderState extends State<_DetailHeader> {
             icon: const Icon(Icons.refresh, size: 18),
             tooltip: 'Refresh',
             onPressed: () => provider.refreshSelectedRepo(),
+            visualDensity: VisualDensity.compact,
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined, size: 18),
+            tooltip: 'Settings',
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const SettingsScreen())),
             visualDensity: VisualDensity.compact,
           ),
         ],
@@ -190,7 +207,9 @@ class _TabBar extends StatelessWidget {
               decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
-                    color: isActive ? theme.colorScheme.primary : Colors.transparent,
+                    color: isActive
+                        ? theme.colorScheme.primary
+                        : Colors.transparent,
                     width: 2,
                   ),
                 ),

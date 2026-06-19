@@ -1,17 +1,37 @@
-# krepo_xplorer
+# KRepoXplorer
 
-A new Flutter project.
+A desktop Git repository manager built with Flutter. Scan a base folder, browse all the Git repos inside it, and inspect branches, commits, working-tree changes, and diffs — all from one window.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- **Repository browser** — add one or more base folders; KRepoXplorer discovers all Git repos inside them automatically.
+- **Overview tab** — current branch, remote URL, and working-tree status at a glance.
+- **Branches tab** — list of local and remote branches.
+- **Commits tab** — recent commit history with author and date.
+- **Changes tab** — list of modified/added/deleted files with per-file diffs.
+- **Diff tab** — full working-tree diff for the selected repository.
+- **Unified diff** — syntax-highlighted diff with green/red line coloring.
+- **Side-by-side diff** — two-column view pairing removed and added lines, with per-token syntax highlighting for 19 languages.
+- **Settings** — toggle between unified and side-by-side diff modes; preference is persisted across sessions.
+- **Auto-refresh** — optional 5-second polling to keep the view current.
 
-A few resources to get you started if this is your first Flutter project:
+## Supported platforms
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+Linux · macOS · Windows
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Getting started
+
+```bash
+flutter pub get
+flutter run -d linux
+```
+
+## Building
+
+```bash
+flutter build linux
+```
+
+## Languages with syntax highlighting
+
+Dart · JavaScript/TypeScript · Python · Java · Kotlin · Swift · Go · Rust · C/C++ · CSS · HTML/XML · JSON · YAML · Bash · SQL · Markdown · PHP · Ruby

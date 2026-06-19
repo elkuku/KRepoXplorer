@@ -76,9 +76,7 @@ class _AppLoaderState extends State<_AppLoader> {
   Widget build(BuildContext context) {
     final provider = context.watch<AppProvider>();
     if (!provider.isInitialized) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     return const MainScreen();
   }

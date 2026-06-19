@@ -42,6 +42,9 @@ class AppProvider extends ChangeNotifier {
   bool _initialized = false;
   bool get isInitialized => _initialized;
 
+  String _diffMode = 'normal';
+  String get diffMode => _diffMode;
+
   List<BaseFolderEntry> get baseFolders => List.unmodifiable(_baseFolders);
   GitRepository? get selectedRepo => _selectedRepo;
   String get detailTab => _detailTab;
@@ -52,11 +55,18 @@ class AppProvider extends ChangeNotifier {
     for (final path in saved) {
       _baseFolders.add(BaseFolderEntry(path: path));
     }
+    _diffMode = await _storage.loadDiffMode();
     _initialized = true;
     notifyListeners();
     for (final folder in _baseFolders) {
       _loadFolder(folder);
     }
+  }
+
+  Future<void> setDiffMode(String mode) async {
+    _diffMode = mode;
+    await _storage.saveDiffMode(mode);
+    notifyListeners();
   }
 
   Future<void> addBaseFolder(String path) async {
@@ -90,7 +100,9 @@ class AppProvider extends ChangeNotifier {
       for (final repo in repos) {
         await _git.loadRepositoryDetails(repo);
       }
-      repos.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      repos.sort(
+        (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+      );
       entry.repositories = repos;
       entry.loadState = LoadState.loaded;
     } catch (e) {
@@ -157,7 +169,8 @@ class AppProvider extends ChangeNotifier {
     diffContent = null;
     notifyListeners();
     if (_selectedRepo != null) {
-      diffContent = await _git.getFileDiff(_selectedRepo!.path, file.path) ?? '';
+      diffContent =
+          await _git.getFileDiff(_selectedRepo!.path, file.path) ?? '';
       notifyListeners();
     }
   }
