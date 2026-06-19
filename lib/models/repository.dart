@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class GitRepository {
   final String path;
   final String name;
@@ -48,22 +50,30 @@ class GitStatusFile {
 
   const GitStatusFile({required this.path, required this.status});
 
-  String get statusLabel {
-    switch (status) {
-      case 'M':
-        return 'Modified';
-      case 'A':
-        return 'Added';
-      case 'D':
-        return 'Deleted';
-      case 'R':
-        return 'Renamed';
-      case '?':
-        return 'Untracked';
-      default:
-        return status;
-    }
-  }
+  String get statusLabel => switch (status) {
+    'M' => 'Modified',
+    'A' => 'Added',
+    'D' => 'Deleted',
+    'R' => 'Renamed',
+    '?' => 'Untracked',
+    _ => status,
+  };
+
+  // Returns a status badge color suitable for both the changes tab and overview.
+  // Callers should pass theme.colorScheme.error for 'D' and
+  // theme.colorScheme.onSurface.withAlpha(153) for untracked.
+  static Color statusColor(
+    String status, {
+    required Color errorColor,
+    required Color untrackedColor,
+    required Color defaultColor,
+  }) => switch (status) {
+    'M' => const Color(0xFFE57C00),
+    'A' => const Color(0xFF2D9436),
+    'D' => errorColor,
+    '?' => untrackedColor,
+    _ => defaultColor,
+  };
 }
 
 class GitBranch {

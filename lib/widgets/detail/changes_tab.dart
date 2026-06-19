@@ -34,7 +34,10 @@ class ChangesTab extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 color: Theme.of(context).colorScheme.surfaceContainerHigh,
                 child: Text(
                   '${files.length} changed file${files.length == 1 ? '' : 's'}',
@@ -63,13 +66,13 @@ class _FileListTile extends StatelessWidget {
   const _FileListTile({required this.file});
 
   Color _statusColor(BuildContext context) {
-    return switch (file.status) {
-      'M' => Colors.orange,
-      'A' => Colors.green,
-      'D' => Theme.of(context).colorScheme.error,
-      '?' => Theme.of(context).colorScheme.onSurface.withAlpha(153),
-      _ => Theme.of(context).colorScheme.onSurface,
-    };
+    final cs = Theme.of(context).colorScheme;
+    return GitStatusFile.statusColor(
+      file.status,
+      errorColor: cs.error,
+      untrackedColor: cs.onSurface.withAlpha(153),
+      defaultColor: cs.onSurface,
+    );
   }
 
   @override
@@ -107,7 +110,13 @@ class _FileListTile extends StatelessWidget {
                   ),
                   if (file.path.contains('/'))
                     Text(
-                      file.path.split('/').reversed.skip(1).toList().reversed.join('/'),
+                      file.path
+                          .split('/')
+                          .reversed
+                          .skip(1)
+                          .toList()
+                          .reversed
+                          .join('/'),
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: theme.colorScheme.onSurface.withAlpha(102),
                       ),
@@ -130,9 +139,7 @@ class _FileDiffPanel extends StatelessWidget {
     final selectedFile = provider.selectedStatusFile;
 
     if (selectedFile == null) {
-      return const Center(
-        child: Text('Select a file to view its diff'),
-      );
+      return const Center(child: Text('Select a file to view its diff'));
     }
 
     if (provider.diffContent == null) {

@@ -203,14 +203,13 @@ class _FileStatusRow extends StatelessWidget {
   const _FileStatusRow({required this.file});
 
   Color _statusColor(BuildContext context) {
-    final theme = Theme.of(context);
-    return switch (file.status) {
-      'M' => Colors.orange,
-      'A' => Colors.green,
-      'D' => theme.colorScheme.error,
-      '?' => theme.colorScheme.onSurface.withAlpha(153),
-      _ => theme.colorScheme.onSurface,
-    };
+    final cs = Theme.of(context).colorScheme;
+    return GitStatusFile.statusColor(
+      file.status,
+      errorColor: cs.error,
+      untrackedColor: cs.onSurface.withAlpha(153),
+      defaultColor: cs.onSurface,
+    );
   }
 
   @override
