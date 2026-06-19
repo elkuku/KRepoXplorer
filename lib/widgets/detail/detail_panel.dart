@@ -255,6 +255,15 @@ class _TabContent extends StatelessWidget {
       return const Center(child: CircularProgressIndicator());
     }
 
+    if (provider.detailLoadState == LoadState.error) {
+      return Center(
+        child: Text(
+          provider.detailError ?? 'Failed to load repository details',
+          style: TextStyle(color: Theme.of(context).colorScheme.error),
+        ),
+      );
+    }
+
     return switch (currentTab) {
       'overview' => const OverviewTab(),
       'changes' => const ChangesTab(),

@@ -38,6 +38,7 @@ class AppProvider extends ChangeNotifier {
   List<GitBranch> branches = [];
   String? diffContent;
   LoadState detailLoadState = LoadState.idle;
+  String? detailError;
 
   bool _initialized = false;
   bool get isInitialized => _initialized;
@@ -143,8 +144,10 @@ class AppProvider extends ChangeNotifier {
       statusFiles = results[1] as List<GitStatusFile>;
       branches = results[2] as List<GitBranch>;
       detailLoadState = LoadState.loaded;
+      detailError = null;
     } catch (e) {
       detailLoadState = LoadState.error;
+      detailError = e.toString();
     }
     notifyListeners();
   }
