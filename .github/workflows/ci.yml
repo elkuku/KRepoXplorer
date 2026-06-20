@@ -29,13 +29,11 @@ jobs:
       - run: flutter analyze
       - run: flutter test
 
-  release:
-    name: Release
+  build-linux:
+    name: Build Linux
     needs: test
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -58,12 +56,117 @@ jobs:
       - name: Package artifact
         run: |
           VERSION="${GITHUB_REF_NAME}"
-          tar -czf "krepo_xplorer-linux-x64-${VERSION}.tar.gz" \
-            -C build/linux/x64/release/bundle .
-          echo "ARTIFACT=krepo_xplorer-linux-x64-${VERSION}.tar.gz" >> "$GITHUB_ENV"
+          ARTIFACT="krepo_xplorer-linux-x64-${VERSION}.tar.gz"
+          tar -czf "${ARTIFACT}" -C build/linux/x64/release/bundle .
+          echo "ARTIFACT=${ARTIFACT}" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: ${{ env.ARTIFACT }}
+
+  build-macos:
+    name: Build macOS
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - run: flutter pub get
+
+      - name: Build macOS release
+        run: |
+          flutter build macos --release \
+            -- CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+
+      - name: Package artifact
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          ARTIFACT="krepo_xplorer-macos-${VERSION}.tar.gz"
+          tar -czf "${ARTIFACT}" -C build/macos/Build/Products/Release krepo_xplorer.app
+          echo "ARTIFACT=${ARTIFACT}" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-build
+          path: ${{ env.ARTIFACT }}
+
+  build-windows:
+    name: Build Windows
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - run: flutter pub get
+
+      - name: Build Windows release
+        run: flutter build windows --release
+
+      - name: Package artifact
+        shell: pwsh
+        run: |
+          $version = $env:GITHUB_REF_NAME
+          $artifact = "krepo_xplorer-windows-x64-$version.zip"
+          Compress-Archive -Path "build/windows/x64/runner/Release/*" -DestinationPath $artifact
+          "ARTIFACT=$artifact" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: ${{ env.ARTIFACT }}
+
+  release:
+    name: Release
+    needs: [build-linux, build-macos, build-windows]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ env.ARTIFACT }}
+          files: |
+            krepo_xplorer-linux-x64-*.tar.gz
+            krepo_xplorer-macos-*.tar.gz
+            krepo_xplorer-windows-x64-*.zip
           generate_release_notes: true
+
+  pages:
+    name: GitHub Pages
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

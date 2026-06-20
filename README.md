@@ -1,5 +1,7 @@
 # KRepoXplorer
 
+**[Website](https://elkuku.github.io/KRepoXplorer/)** · [Releases](https://github.com/elkuku/KRepoXplorer/releases)
+
 A desktop Git repository manager built with Flutter. Scan a base folder, browse all the Git repos inside it, and inspect branches, commits, working-tree changes, and diffs — all from one window.
 
 ## Features
@@ -29,7 +31,9 @@ flutter run -d linux
 ## Building
 
 ```bash
-flutter build linux
+flutter build linux    # Linux
+flutter build macos    # macOS
+flutter build windows  # Windows
 ```
 
 ## Languages with syntax highlighting
